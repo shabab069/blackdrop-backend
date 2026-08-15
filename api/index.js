@@ -4,7 +4,6 @@ const app = express();
 
 app.use(express.json());
 
-// Helper function to clean query params from IG links
 function cleanUrl(rawUrl) {
     try {
         const parsed = new URL(rawUrl);
@@ -21,10 +20,9 @@ app.get('/api/download', async (req, res) => {
         return res.status(400).json({ error: 'URL parameter is required' });
     }
 
-    // Clean tracking tags like ?igsh=...
     videoUrl = cleanUrl(videoUrl);
 
-    // Engine 1: Cobalt Engine
+    // Engine 1: Cobalt
     try {
         const response = await axios.get(`https://api.cobalt.tools/api/json`, {
             params: { url: videoUrl },
@@ -42,10 +40,10 @@ app.get('/api/download', async (req, res) => {
             return res.json({ status: 'success', url: response.data.picker[0].url });
         }
     } catch (err) {
-        console.log("Engine 1 (Cobalt) failed, trying Engine 2...");
+        console.log("Engine 1 failed");
     }
 
-    // Engine 2: Fallback Instagram API
+    // Engine 2: TikWM / IG Fallback
     try {
         const fallbackRes = await axios.get(`https://v3.tikwm.com/api/`, {
             params: { url: videoUrl },
@@ -56,22 +54,10 @@ app.get('/api/download', async (req, res) => {
             return res.json({ status: 'success', url: fallbackRes.data.data.play });
         }
     } catch (err) {
-        console.log("Engine 2 failed, trying Engine 3...");
+        console.log("Engine 2 failed");
     }
 
-    // Engine 3: SaveFrom Direct Fallback
-    try {
-        const sfRes = await axios.get(`https://worker.sf-helper.com/project/savefrom-redirect.php?url=${encodeURIComponent(videoUrl)}`, {
-            timeout: 8000
-        });
-        if (sfRes.data && sfRes.data.url) {
-            return res.json({ status: 'success', url: sfRes.data.url });
-        }
-    } catch (err) {
-        console.log("Engine 3 failed.");
-    }
-
-    return res.status(500).json({ error: 'Failed to process media URL across all engines' });
+    return res.status(500).json({ error: 'Failed to extract video' });
 });
 
 module.exports = app;
