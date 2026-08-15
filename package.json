@@ -2,7 +2,7 @@
   "name": "blackdrop-backend",
   "version": "1.0.0",
   "dependencies": {
-    "express": "^4.19.2",
-    "@distube/yt-dlp": "^3.0.5"
+    "axios": "^1.7.2",
+    "express": "^4.19.2"
   }
 }
