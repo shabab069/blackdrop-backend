@@ -1,12 +1,8 @@
 {
   "name": "blackdrop-backend",
   "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
     "express": "^4.19.2",
-    "yt-dlp-exec": "^2.5.8"
+    "instagram-url-direct": "^1.0.12"
   }
 }
