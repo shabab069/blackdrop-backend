@@ -12,7 +12,7 @@ app.get('/api/download', (req, res) => {
     }
 
     // Execute yt-dlp to extract direct video stream URL
-    const command = `npx yt-dlp-exec "${videoUrl}" -g -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"`;
+    const command = `yt-dlp "${videoUrl}" -g -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"`;
 
     exec(command, { timeout: 30000 }, (error, stdout, stderr) => {
         if (error) {
@@ -29,7 +29,7 @@ app.get('/api/download', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`BlackDrop free backend running on port ${PORT}`);
 });
