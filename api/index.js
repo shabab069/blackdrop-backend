@@ -1,5 +1,5 @@
 const express = require('express');
-const instagramGetUrl = require('instagram-url-direct');
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
@@ -12,14 +12,25 @@ app.get('/api/download', async (req, res) => {
     }
 
     try {
-        let links = await instagramGetUrl(videoUrl);
-        if (links && links.url_list && links.url_list.length > 0) {
-            return res.json({ status: 'success', url: links.url_list[0] });
+        // Public API endpoint parsing Instagram, TikTok, YouTube, FB videos
+        const response = await axios.get(`https://api.cobalt.tools/api/json`, {
+            params: { url: videoUrl },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.data && response.data.url) {
+            return res.json({ status: 'success', url: response.data.url });
+        } else if (response.data && response.data.picker && response.data.picker.length > 0) {
+            return res.json({ status: 'success', url: response.data.picker[0].url });
         } else {
-            return res.status(500).json({ error: 'Failed to extract video' });
+            return res.status(500).json({ error: 'Failed to extract video stream' });
         }
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        console.error("Extraction error:", error.message);
+        return res.status(500).json({ error: 'Download engine error or link not supported' });
     }
 });
 
