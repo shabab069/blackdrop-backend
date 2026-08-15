@@ -22,7 +22,7 @@ app.get('/api/download', async (req, res) => {
 
     videoUrl = cleanUrl(videoUrl);
 
-    // Engine 1: Cobalt (Fixed POST method)
+    // Engine 1: Cobalt POST API
     try {
         const cobaltRes = await axios.post('https://api.cobalt.tools/api/json', {
             url: videoUrl,
@@ -42,10 +42,10 @@ app.get('/api/download', async (req, res) => {
             return res.json({ status: 'success', url: cobaltRes.data.picker[0].url });
         }
     } catch (err) {
-        console.log("Cobalt Engine failed, trying Engine 2...");
+        console.log("Cobalt Engine failed, trying fallbacks...");
     }
 
-    // Engine 2: Dedicated Instagram Extractor
+    // Engine 2: Dedicated Instagram Proxy
     if (videoUrl.includes('instagram.com')) {
         try {
             const igRes = await axios.get(`https://api.instavideosave.com/allinone`, {
@@ -60,11 +60,11 @@ app.get('/api/download', async (req, res) => {
                 return res.json({ status: 'success', url: igRes.data.video[0].video });
             }
         } catch (err) {
-            console.log("Instagram Scraper failed, trying Engine 3...");
+            console.log("Instagram Scraper failed...");
         }
     }
 
-    // Engine 3: TikWM (For TikTok)
+    // Engine 3: TikWM Proxy
     if (videoUrl.includes('tiktok.com')) {
         try {
             const tikRes = await axios.get(`https://v3.tikwm.com/api/`, {
@@ -80,20 +80,11 @@ app.get('/api/download', async (req, res) => {
         }
     }
 
-    // Engine 4: Universal Fallback Engine
-    try {
-        const universalRes = await axios.get(`https://api.snapsave.app/parse?url=${encodeURIComponent(videoUrl)}`, {
-            timeout: 9000
-        });
-
-        if (universalRes.data && universalRes.data.data && universalRes.data.data.url) {
-            return res.json({ status: 'success', url: universalRes.data.data.url });
-        }
-    } catch (err) {
-        console.log("Universal Fallback failed.");
-    }
-
     return res.status(500).json({ error: 'Failed to extract video stream across all engines' });
 });
+
+// Local & Vercel Listener
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app;
